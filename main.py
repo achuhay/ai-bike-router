@@ -3,13 +3,13 @@ from pydantic import BaseModel
 import requests
 import os
 import logging
-import openai  # ✅ OpenAI v1.x import
+from openai import OpenAI  # ✅ OpenAI v1.x client
 
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 
-# ✅ Set API keys from environment
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# ✅ Proper OpenAI client setup with environment variable
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 ORS_API_KEY = os.getenv("ORS_API_KEY")
 
 class PromptRequest(BaseModel):
@@ -22,8 +22,8 @@ async def generate_route(data: PromptRequest, request: Request):
     try:
         logging.info(f"Prompt received: {data.prompt}")
 
-        # ✅ OpenAI v1.x chat completion call with safe formatting
-        gpt_response = openai.chat.completions.create(
+        # ✅ OpenAI v1.x chat completion call
+        gpt_response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are an assistant that helps generate cycling route preferences."},
@@ -33,7 +33,7 @@ async def generate_route(data: PromptRequest, request: Request):
         parsed_text = gpt_response.choices[0].message.content
         logging.info(f"AI interpreted prompt as: {parsed_text}")
 
-        # Call OpenRouteService API
+        # Send request to OpenRouteService
         ors_response = requests.post(
             "https://api.openrouteservice.org/v2/directions/cycling-regular",
             headers={
