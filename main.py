@@ -8,7 +8,7 @@ from openai import OpenAI
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 
-# ✅ Use OpenAI v1 client interface
+# Initialize OpenAI client with API key from environment
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 ORS_API_KEY = os.getenv("ORS_API_KEY")
 
