@@ -6,7 +6,7 @@ import os
 
 app = FastAPI()
 
-# Use environment variables from Render
+# Get keys from environment variables
 openai.api_key = os.getenv("OPENAI_API_KEY")
 ORS_API_KEY = os.getenv("ORS_API_KEY")
 
@@ -17,7 +17,7 @@ class PromptRequest(BaseModel):
 
 @app.post("/generate-route")
 async def generate_route(data: PromptRequest):
-    # Step 1: (Optional) Ask AI to interpret the prompt
+    # Step 1: Ask AI to interpret the prompt (just logging for now)
     gpt_response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -25,12 +25,10 @@ async def generate_route(data: PromptRequest):
             {"role": "user", "content": f"Extract preferences from: '{data.prompt}'"}
         ]
     )
+    parsed_text = gpt_response["choices"][0]["message"]["content"]
+    print("AI said:", parsed_text)
 
-    # Log what AI said (but we're not using it yet)
-    parsed_text = gpt_response['choices'][0]['message']['content']
-    print("AI Interpretation:", parsed_text)
-
-    # Step 2: Call ORS to actually get a route
+    # Step 2: Use ORS to get the route
     ors_response = requests.post(
         "https://api.openrouteservice.org/v2/directions/cycling-regular",
         headers={
@@ -44,5 +42,5 @@ async def generate_route(data: PromptRequest):
         }
     )
 
-    # Step 3: Return the full ORS response
+    # Step 3: Return the full route response
     return ors_response.json()
