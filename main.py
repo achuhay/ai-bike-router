@@ -35,7 +35,7 @@ async def generate_route(data: PromptRequest, request: Request):
                 {"role": "user", "content": f"Extract preferences from: \"{data.prompt}\""}
             ]
         )
-        parsed_text = gpt_response.choices[0].message["content"]
+        parsed_text = gpt_response.choices[0].message.content
         logging.info(f"AI interpreted prompt as: {parsed_text}")
 
         # ✅ Call OpenRouteService
