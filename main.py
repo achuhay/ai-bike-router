@@ -26,4 +26,13 @@ async def generate_route(data: PromptRequest, request: Request):
         gpt_response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "
+                {"role": "system", "content": "You are an assistant that helps generate cycling route preferences."},
+                {"role": "user", "content": f"Extract preferences from: '{data.prompt}'"}
+            ]
+        )
+        parsed_text = gpt_response.choices[0].message.content
+        logging.info(f"AI interpreted prompt as: {parsed_text}")
+
+        # Call OpenRouteService API
+        ors_response = requests.post(
+            "https://api.openrouteservice.org/v2/directions/cycl
