@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import requests
 import os
 import logging
-from openai import OpenAI  # ✅ NEW: import OpenAI v1 client
+from openai import OpenAI  # ✅ OpenAI v1 client
 
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
@@ -22,7 +22,7 @@ async def generate_route(data: PromptRequest, request: Request):
     try:
         logging.info(f"Prompt received: {data.prompt}")
 
-        # ✅ Updated for OpenAI v1.0+
+        # ✅ OpenAI v1 SDK usage
         gpt_response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -33,19 +33,18 @@ async def generate_route(data: PromptRequest, request: Request):
         parsed_text = gpt_response.choices[0].message.content
         logging.info(f"AI interpreted prompt as: {parsed_text}")
 
-        ors_payload = {
-            "coordinates": [data.start, data.end],
-            "instructions": True,
-            "elevation": True
-        }
-
+        # Send request to ORS
         ors_response = requests.post(
             "https://api.openrouteservice.org/v2/directions/cycling-regular",
             headers={
                 "Authorization": ORS_API_KEY,
                 "Content-Type": "application/json"
             },
-            json=ors_payload
+            json={
+                "coordinates": [data.start, data.end],
+                "instructions": True,
+                "elevation": True
+            }
         )
 
         logging.info(f"ORS response: {ors_response.text}")
