@@ -22,9 +22,34 @@ async def generate_route(data: PromptRequest, request: Request):
     try:
         logging.info(f"Prompt received: {data.prompt}")
 
-        # ✅ OpenAI v1.x chat completion call
+        # ✅ OpenAI v1.x chat completion call with safe formatting
         gpt_response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are an assistant that helps generate cycling route preferences."},
-                {"role": "user", "content": f'Extract preferences from
+                {"role": "user", "content": f"""Extract preferences from: "{data.prompt}" """}
+            ]
+        )
+        parsed_text = gpt_response.choices[0].message.content
+        logging.info(f"AI interpreted prompt as: {parsed_text}")
+
+        # Call OpenRouteService API
+        ors_response = requests.post(
+            "https://api.openrouteservice.org/v2/directions/cycling-regular",
+            headers={
+                "Authorization": ORS_API_KEY,
+                "Content-Type": "application/json"
+            },
+            json={
+                "coordinates": [data.start, data.end],
+                "instructions": True,
+                "elevation": True
+            }
+        )
+
+        logging.info(f"ORS response: {ors_response.text}")
+        return ors_response.json()
+
+    except Exception as e:
+        logging.error(f"Error occurred: {str(e)}")
+        return {"error": "Internal server error", "details": str(e)}
