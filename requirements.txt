@@ -1,5 +1,4 @@
 fastapi
 uvicorn
 requests
---constraint constraints.txt
-openai
+openai==0.28.1
