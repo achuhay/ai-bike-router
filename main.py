@@ -1,3 +1,5 @@
+THIS_WILL_BREAK_THE_SERVER = whoops
+
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 import requests
