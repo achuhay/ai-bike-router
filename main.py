@@ -1,16 +1,14 @@
-THIS_WILL_BREAK_THE_SERVER = whoops
-
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 import requests
 import os
 import logging
-from openai import OpenAI  # ✅ OpenAI v1 client
+from openai import OpenAI  # OpenAI v1.0+ import
 
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 
-# Set up OpenAI client
+# OpenAI v1.0+ client setup
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 ORS_API_KEY = os.getenv("ORS_API_KEY")
 
@@ -24,7 +22,6 @@ async def generate_route(data: PromptRequest, request: Request):
     try:
         logging.info(f"Prompt received: {data.prompt}")
 
-        # ✅ OpenAI v1 SDK usage
         gpt_response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -35,7 +32,6 @@ async def generate_route(data: PromptRequest, request: Request):
         parsed_text = gpt_response.choices[0].message.content
         logging.info(f"AI interpreted prompt as: {parsed_text}")
 
-        # Send request to ORS
         ors_response = requests.post(
             "https://api.openrouteservice.org/v2/directions/cycling-regular",
             headers={
