@@ -8,12 +8,15 @@ import openai
 app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 
-# ✅ Get API keys from environment
-openai_api_key = "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"
+# ✅ Get keys from environment
+openai_api_key = os.getenv("OPENAI_API_KEY")
 ORS_API_KEY = os.getenv("ORS_API_KEY")
 
-# ✅ Debug: Log the OpenAI key to check if it's being passed
-logging.info(f"OPENAI_API_KEY detected: {openai_api_key}")
+# ✅ Log the OpenAI key format (partially) for debug
+if openai_api_key:
+    logging.info(f"OpenAI key starts with: {openai_api_key[:10]}...")  # Safe for logging
+else:
+    logging.error("OPENAI_API_KEY not found in environment!")
 
 openai.api_key = openai_api_key
 
@@ -27,7 +30,6 @@ async def generate_route(data: PromptRequest, request: Request):
     try:
         logging.info(f"Prompt received: {data.prompt}")
 
-        # ✅ OpenAI v0.28.x style
         gpt_response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -35,10 +37,10 @@ async def generate_route(data: PromptRequest, request: Request):
                 {"role": "user", "content": f"Extract preferences from: \"{data.prompt}\""}
             ]
         )
-        parsed_text = gpt_response.choices[0].message.content
+
+        parsed_text = gpt_response.choices[0].message["content"]
         logging.info(f"AI interpreted prompt as: {parsed_text}")
 
-        # ✅ Call OpenRouteService
         ors_response = requests.post(
             "https://api.openrouteservice.org/v2/directions/cycling-regular",
             headers={
