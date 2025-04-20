@@ -9,7 +9,7 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 
 # ✅ Get API keys from environment
-openai_api_key = "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"
+openai_api_key = "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"
 ORS_API_KEY = os.getenv("ORS_API_KEY")
 
 # ✅ Debug: Log the OpenAI key to check if it's being passed
